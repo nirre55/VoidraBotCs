@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ccxt" Version="4.4.89" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.6" />
+  </ItemGroup>
+
 </Project>

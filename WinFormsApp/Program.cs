@@ -1,3 +1,9 @@
+using Implementation.Utils;
+using Implementation.Wrappers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
+
 namespace WinFormsApp
 {
     internal static class Program
@@ -11,7 +17,60 @@ namespace WinFormsApp
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+
+            // Créer le service provider
+            var serviceProvider = CreateServiceProvider();
+
+            // Récupérer Form1 depuis le container DI
+            var form1 = serviceProvider.GetRequiredService<Form1>();
+
+            Application.Run(form1);
+        }
+
+        private static IServiceProvider CreateServiceProvider()
+        {
+            var services = new ServiceCollection();
+            ConfigureLogging(services);
+            ConfigureDependencies(services);
+            return services.BuildServiceProvider();
+        }
+
+        private static void ConfigureLogging(IServiceCollection services)
+        {
+            // Extension AddLogging se trouve dans Microsoft.Extensions.DependencyInjection
+            services.AddLogging(builder =>
+            {
+                builder
+                    .AddSimpleConsole(options =>
+                    {
+                        options.IncludeScopes = false;
+                        options.SingleLine = true;
+                    })
+                    .AddDebug()
+                    .SetMinimumLevel(LogLevel.Debug);
+            });
+        }
+
+        private static void ConfigureDependencies(IServiceCollection services)
+        {
+            // Register factory and wrapper
+            services.AddSingleton<IExchangeFactory, ExchangeFactory>();
+            services.AddTransient<ICcxtWrapper>(sp =>
+            {
+                var factory = sp.GetRequiredService<IExchangeFactory>();
+                var logger = sp.GetRequiredService<ILogger<CcxtWrapper>>();
+
+                // Configuration parameters (could be loaded from config file)
+                const string exchangeId = "binanceusdm";
+                const string apiKey = "71c0d61b99b727d02a7399fd9d05aefdeafd3f9c984a51fad08314518fe9ad6b";
+                const string secretKey = "06b6bef900e4f9700039716b08d24ba8306d58c0055019856d9336ac8791d0c6";
+                const bool sandbox = true;
+
+                return new CcxtWrapper(factory, logger, exchangeId, apiKey, secretKey, sandbox);
+            });
+
+            // Register the main form
+            services.AddTransient<Form1>();
         }
     }
 }
