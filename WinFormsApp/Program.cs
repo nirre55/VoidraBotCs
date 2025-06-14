@@ -1,8 +1,11 @@
 using Implementation.Utils;
+using Implementation.Utils.Interfaces;
 using Implementation.Wrappers;
+using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
+using System.Net.Sockets;
 
 namespace WinFormsApp
 {
@@ -66,7 +69,8 @@ namespace WinFormsApp
                 const string secretKey = "06b6bef900e4f9700039716b08d24ba8306d58c0055019856d9336ac8791d0c6";
                 const bool sandbox = true;
 
-                return new CcxtWrapper(factory, logger, exchangeId, apiKey, secretKey, sandbox);
+                var exchangeWrapper = factory.Create(exchangeId, apiKey, secretKey, sandbox);
+                return new CcxtWrapper(exchangeWrapper, logger, apiKey, secretKey);
             });
 
             // Register the main form

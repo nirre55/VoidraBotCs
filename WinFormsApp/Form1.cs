@@ -1,4 +1,4 @@
-using Implementation.Wrappers;
+using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace WinFormsApp
@@ -28,7 +28,7 @@ namespace WinFormsApp
 
             try
             {
-                decimal usdt = await _ccxt.GetBalanceAsync("USDT");
+                double usdt = await _ccxt.GetBalanceAsync("USDT");
                 label1.Text = $"{usdt:N4} USDT";
                 _logger.LogInformation("Solde USDT récupéré : {Balance}", usdt);
             }

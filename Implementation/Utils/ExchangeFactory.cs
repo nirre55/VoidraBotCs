@@ -1,4 +1,7 @@
 ﻿using ccxt;
+using Implementation.Utils.Interfaces;
+using Implementation.Wrappers;
+using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 
@@ -14,12 +17,7 @@ namespace Implementation.Utils
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public Exchange Create(
-            string exchangeId,
-            string apiKey = null,
-            string secret = null,
-            bool useSandbox = false
-        )
+        public IExchangeWrapper Create(string exchangeId, string apiKey, string secret, bool useSandbox)
         {
             if (string.IsNullOrWhiteSpace(exchangeId))
                 throw new ArgumentException("exchangeId ne peut pas être vide.", nameof(exchangeId));
@@ -33,7 +31,7 @@ namespace Implementation.Utils
                 exchangeInstance.setSandboxMode(true);
             }
 
-            return exchangeInstance;
+            return new ExchangeAdapter(exchangeInstance);
         }
 
         private Type ResolveExchangeType(string exchangeId)

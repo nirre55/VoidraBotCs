@@ -1,28 +1,23 @@
-﻿using System.Reflection;
-using ccxt;
-using Implementation.Utils;
+﻿using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Implementation.Wrappers
 {
     public class CcxtWrapper : ICcxtWrapper
     {
-        private readonly Exchange _exchange;
+        private readonly IExchangeWrapper _exchange;
         private readonly ILogger<CcxtWrapper> _logger;
         private readonly bool _isAuthenticated;
 
         public CcxtWrapper(
-            IExchangeFactory factory,
+            IExchangeWrapper exchange,
             ILogger<CcxtWrapper> logger,
-            string exchangeId,
             string apiKey = null,
-            string secret = null,
-            bool useSandbox = false
+            string secret = null
         )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _exchange = factory?.Create(exchangeId, apiKey, secret, useSandbox)
-                        ?? throw new ArgumentNullException(nameof(factory));
+            _exchange = exchange ?? throw new ArgumentNullException(nameof(exchange));
             _isAuthenticated = !string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(secret);
         }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Implementation.Wrappers
+namespace Implementation.Wrappers.Interfaces
 {
     public interface ICcxtWrapper
     {
