@@ -1,4 +1,4 @@
-﻿namespace Implementation.Utils
+﻿namespace Implementation.Utils.Interfaces
 {
     public interface IApiKeyStorage
     {

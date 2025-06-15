@@ -1,5 +1,6 @@
 using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Net.Sockets;
 
 namespace WinFormsApp
 {
@@ -23,35 +24,50 @@ namespace WinFormsApp
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            button1.Enabled = false;
-            label1.Text = "Chargement…";
+            //button1.Enabled = false;
+            //label1.Text = "Chargement…";
 
-            try
-            {
-                double usdt = await _ccxt.GetBalanceAsync("USDT");
-                label1.Text = $"{usdt:N4} USDT";
-                _logger.LogInformation("Solde USDT récupéré : {Balance}", usdt);
-            }
-            catch (Exception ex)
-            {
-                label1.Text = "Erreur";
-                _logger.LogError(ex, "Erreur lors de la récupération du solde");
-                MessageBox.Show(
-                    $"Impossible de récupérer le solde :\n{ex.Message}",
-                    "Erreur",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-            finally
-            {
-                button1.Enabled = true;
-            }
+            //try
+            //{
+            //    double usdt = await _ccxt.GetBalanceAsync("USDT");
+            //    label1.Text = $"{usdt:N4} USDT";
+            //    _logger.LogInformation("Solde USDT récupéré : {Balance}", usdt);
+            //}
+            //catch (Exception ex)
+            //{
+            //    label1.Text = "Erreur";
+            //    _logger.LogError(ex, "Erreur lors de la récupération du solde");
+            //    MessageBox.Show(
+            //        $"Impossible de récupérer le solde :\n{ex.Message}",
+            //        "Erreur",
+            //        MessageBoxButtons.OK,
+            //        MessageBoxIcon.Error
+            //    );
+            //}
+            //finally
+            //{
+            //    button1.Enabled = true;
+            //}
 
         }
 
         private void label1_Click(object sender, EventArgs e)
         {
+
+        }
+
+        private void InitializeTabs()
+        {
+            // Récupérer le TabControl créé en Designer
+            var tab = this.;
+
+            // Instancier chaque UserControl
+            var configCtrl = new ConfigTabControl { Dock = DockStyle.Fill };
+            var simulationCtrl = new SimulationTabControl { Dock = DockStyle.Fill };
+
+            // Ajouter aux TabPages (Name configuré dans Form1.Designer)
+            tab.TabPages["tabPageConfig"].Controls.Add(configCtrl);
+            tab.TabPages["tabPageSimulation"].Controls.Add(simulationCtrl);
 
         }
     }

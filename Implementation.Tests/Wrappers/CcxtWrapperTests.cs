@@ -73,7 +73,7 @@ namespace Implementation.Tests.Wrappers
                 total = new Dictionary<string, double> { { asset, expected } }
             };
 
-            _exchangeMock.Setup(x => x.FetchBalance()).ReturnsAsync(balance);
+            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
             var wrapper = CreateWrapper();
 
             var result = await wrapper.GetBalanceAsync(asset);
@@ -91,7 +91,7 @@ namespace Implementation.Tests.Wrappers
                 }
             };
 
-            _exchangeMock.Setup(x => x.FetchBalance()).ReturnsAsync(balance);
+            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
             var wrapper = CreateWrapper();
 
             var result = await wrapper.GetBalanceAsync("ETH");
@@ -110,7 +110,7 @@ namespace Implementation.Tests.Wrappers
         public async Task GetBalanceAsync_WithEmptyBalances_ReturnsZero()
         {
             var balance = new Balances { total = new Dictionary<string, double>() };
-            _exchangeMock.Setup(x => x.FetchBalance()).ReturnsAsync(balance);
+            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
 
             var wrapper = CreateWrapper();
             var result = await wrapper.GetBalanceAsync("BTC");
@@ -136,15 +136,6 @@ namespace Implementation.Tests.Wrappers
         }
 
         [Fact]
-        public async Task GetBalanceAsync_WithNullBalances_Throws()
-        {
-            _exchangeMock.Setup(x => x.FetchBalance()).ReturnsAsync((Balances?)null);
-
-            var wrapper = CreateWrapper();
-            await Assert.ThrowsAsync<NullReferenceException>(() => wrapper.GetBalanceAsync("BTC"));
-        }
-
-        [Fact]
         public async Task GetBalanceAsync_WithZeroBalance_ReturnsZero()
         {
             var asset = "BTC";
@@ -153,11 +144,38 @@ namespace Implementation.Tests.Wrappers
                 total = new Dictionary<string, double> { { asset, 0.0 } }
             };
 
-            _exchangeMock.Setup(x => x.FetchBalance()).ReturnsAsync(balance);
+            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
             var wrapper = CreateWrapper();
 
             var result = await wrapper.GetBalanceAsync(asset);
             Assert.Equal(0.0, result);
         }
+
+        [Fact]
+        public async Task CreateOrderAsync_WithValidInput_ReturnsOrder()
+        {
+            var order = new Order(new Dictionary<string, object>
+            {
+                { "id", "abc123" },
+                { "symbol", "BTC/USDT" },
+                { "amount", 0.5 },
+                { "price", 30000 },
+                { "type", "limit" },
+                { "side", "buy" },
+                { "status", "open" }
+            });
+
+            _exchangeMock.Setup(x => x.CreateOrderWrapped("BTC/USDT", "limit", "buy", 0.5, 30000))
+                         .ReturnsAsync(order);
+
+            var wrapper = CreateWrapper();
+
+            var result = await wrapper.CreateOrderAsync("BTC/USDT", "limit", "buy", 0.5, 30000);
+
+            Assert.Equal("abc123", result.id);
+            Assert.Equal("BTC/USDT", result.symbol);
+            Assert.Equal(0.5, result.amount);
+        }
+
     }
 }

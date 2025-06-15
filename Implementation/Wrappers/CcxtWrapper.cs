@@ -1,4 +1,5 @@
-﻿using Implementation.Wrappers.Interfaces;
+﻿using ccxt;
+using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Implementation.Wrappers
@@ -29,13 +30,24 @@ namespace Implementation.Wrappers
                 throw new InvalidOperationException("Clés API requises pour accéder au solde.");
             }
 
-            var balances = await _exchange.FetchBalance();
+            var balances = await _exchange.FetchBalanceWrapped();
 
             if (balances.total.TryGetValue(asset, out var total))
                 return total;
 
             _logger.LogWarning("Actif '{Asset}' non trouvé dans les soldes.", asset);
             return 0.0;
+        }
+
+        public Task<Order> CreateOrderAsync(string symbol, string type, string side, double amount, double? price = null)
+        {
+            if (!_isAuthenticated)
+            {
+                _logger.LogError("Clés API requises pour créer un ordre.");
+                throw new InvalidOperationException("Clés API requises pour créer un ordre.");
+            }
+
+            return _exchange.CreateOrderWrapped(symbol, type, side, amount, price);
         }
     }
 }

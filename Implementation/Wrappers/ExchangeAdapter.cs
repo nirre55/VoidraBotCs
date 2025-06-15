@@ -12,9 +12,13 @@ namespace Implementation.Wrappers
             _exchange = exchange;
         }
 
-        public Task<Balances> FetchBalance()
+        public Task<Balances> FetchBalanceWrapped()
+            => _exchange.FetchBalance();
+
+        public async Task<Order> CreateOrderWrapped(string symbol, string type, string side, double amount, double? price = null)
         {
-            return _exchange.FetchBalance();
+            var raw = await _exchange.CreateOrder(symbol, type, side, amount, price);
+            return new Order(raw);
         }
     }
 }

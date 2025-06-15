@@ -1,8 +1,7 @@
 ﻿using ccxt;
-using Implementation.Wrappers.Interfaces;
 
 
-namespace Implementation.Utils.Interfaces
+namespace Implementation.Wrappers.Interfaces
 {
     // Factory interface to create CCXT Exchange instances
     public interface IExchangeFactory

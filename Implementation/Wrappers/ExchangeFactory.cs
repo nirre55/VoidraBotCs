@@ -1,13 +1,11 @@
 ﻿using ccxt;
-using Implementation.Utils.Interfaces;
-using Implementation.Wrappers;
 using Implementation.Wrappers.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 
-namespace Implementation.Utils
+namespace Implementation.Wrappers
 {
-    public class ExchangeFactory: IExchangeFactory
+    public class ExchangeFactory : IExchangeFactory
     {
         private readonly ILogger<ExchangeFactory> _logger;
         private static readonly Dictionary<string, Type> _exchangeTypeCache = new();
