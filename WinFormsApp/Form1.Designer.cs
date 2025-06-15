@@ -28,47 +28,64 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
-            label1 = new Label();
+            mainTabControl = new TabControl();
+            tabPageConfig = new TabPage();
+            tabPageSimulation = new TabPage();
+            mainTabControl.SuspendLayout();
             SuspendLayout();
             // 
-            // button1
+            // mainTabControl
             // 
-            button1.Location = new Point(327, 81);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 0;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            mainTabControl.Controls.Add(tabPageConfig);
+            mainTabControl.Controls.Add(tabPageSimulation);
+            mainTabControl.Dock = DockStyle.Fill;
+            mainTabControl.Location = new Point(0, 0);
+            mainTabControl.Margin = new Padding(4, 4, 4, 4);
+            mainTabControl.Name = "mainTabControl";
+            mainTabControl.SelectedIndex = 0;
+            mainTabControl.Size = new Size(1029, 630);
+            mainTabControl.TabIndex = 0;
             // 
-            // label1
+            // tabPageConfig
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(456, 87);
-            label1.Name = "label1";
-            label1.Size = new Size(38, 15);
-            label1.TabIndex = 1;
-            label1.Text = "label1";
-            label1.Click += label1_Click;
+            tabPageConfig.Location = new Point(4, 30);
+            tabPageConfig.Margin = new Padding(4, 4, 4, 4);
+            tabPageConfig.Name = "tabPageConfig";
+            tabPageConfig.Padding = new Padding(4, 4, 4, 4);
+            tabPageConfig.Size = new Size(1021, 596);
+            tabPageConfig.TabIndex = 0;
+            tabPageConfig.Text = "Config";
+            tabPageConfig.UseVisualStyleBackColor = true;
+            // 
+            // tabPageSimulation
+            // 
+            tabPageSimulation.Location = new Point(4, 24);
+            tabPageSimulation.Margin = new Padding(4, 4, 4, 4);
+            tabPageSimulation.Name = "tabPageSimulation";
+            tabPageSimulation.Padding = new Padding(4, 4, 4, 4);
+            tabPageSimulation.Size = new Size(1021, 602);
+            tabPageSimulation.TabIndex = 1;
+            tabPageSimulation.Text = "Simulation";
+            tabPageSimulation.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(9F, 21F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(label1);
-            Controls.Add(button1);
+            ClientSize = new Size(1029, 630);
+            Controls.Add(mainTabControl);
+            Font = new Font("Segoe UI", 12F);
+            Margin = new Padding(4, 4, 4, 4);
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
+            mainTabControl.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private Button button1;
-        private Label label1;
+        private TabPage tabPageConfig;
+        private TabPage tabPageSimulation;
+        public TabControl mainTabControl;
     }
 }
