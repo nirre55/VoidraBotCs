@@ -8,6 +8,7 @@ namespace WinFormsApp
         {
             InitializeComponent();
             LoadLabels();
+            LoadPlatforms();
         }
 
         private void LoadLabels()
@@ -16,6 +17,15 @@ namespace WinFormsApp
             lblApiSecret.Text = UiStrings.Label_ApiSecret;
             lblPlatform.Text = UiStrings.Label_Platform;
             chkSandbox.Text = UiStrings.Label_Sandbox;
+            buttonSave.Text = UiStrings.Button_Save;
+        }
+
+        private void LoadPlatforms()
+        {
+            cmbPlatform.Items.Clear();
+            cmbPlatform.Items.Add("binanceusdm");
+            // Ajouter d'autres plateformes si nécessaire
+            cmbPlatform.SelectedIndex = 0; // Sélectionner la première plateforme par défaut
         }
     }
 }

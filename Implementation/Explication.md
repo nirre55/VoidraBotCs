@@ -70,3 +70,57 @@ Cette méthode est plus robuste que `Type.GetType("ccxt.Binance")` car :
 - Elle évite les problèmes de résolution de noms de types
 - Elle est insensible à la casse
 - Elle garantit qu'on trouve une classe instanciable
+
+---
+
+## Code analysé
+
+```csharp
+private record CredentialData(string ApiKey, string ApiSecret, bool SandMode);
+```
+
+## ✅ C’est quoi un `record` ?
+
+Un `record` en C# (depuis C# 9.0) est une **structure immuable** et optimisée pour **stocker des données**. Elle est parfaite pour ce cas :
+
+* Elle fournit automatiquement :
+
+  * le constructeur
+  * l’égalité structurelle (`Equals`)
+  * un `ToString()` lisible
+* Elle est **idéale pour de la sérialisation** (comme ici avec JSON)
+
+
+## 🧠 Pourquoi l’utiliser ici ?
+
+On l’utilise pour regrouper les données de configuration :
+
+* `ApiKey` : string
+* `ApiSecret` : string
+* `SandMode` : bool
+
+Et pouvoir les sauvegarder/charger en une seule opération JSON :
+
+```csharp
+string json = JsonSerializer.Serialize(data);
+var data = JsonSerializer.Deserialize<CredentialData>(json);
+```
+
+## 📌 Alternative sans `record` (moins élégante) :
+
+Tu pourrais aussi écrire :
+
+```csharp
+private class CredentialData
+{
+    public string ApiKey { get; set; }
+    public string ApiSecret { get; set; }
+    public bool SandMode { get; set; }
+}
+```
+
+Mais ça ajoute du **code inutile** et moins de **sécurité immuable** (propriétés modifiables).
+
+---
+
+

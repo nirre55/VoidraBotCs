@@ -1,32 +1,54 @@
 ﻿using Implementation.Utils.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace Implementation.Utils
 {
     public class ApiKeyStorage : IApiKeyStorage
     {
-        private readonly string _appDir;
+        private readonly string _filePath;
 
-        public ApiKeyStorage(string? appDir = null)
+        private record CredentialData(string ApiKey, string ApiSecret, bool SandMode);
+
+        public ApiKeyStorage(string platform)
         {
-            _appDir = appDir ?? Path.Combine(
+            string appDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "VoidraApp"
+                "VoidraApp",
+                platform
             );
+            Directory.CreateDirectory(appDir);
+            _filePath = Path.Combine(appDir, "credentials.enc");
         }
 
-        private string ApiKeyPath => Path.Combine(_appDir, "api.key");
-        private string ApiSecretPath => Path.Combine(_appDir, "api.secret");
+        public void SaveAll(string apiKey, string apiSecret, bool sandMode)
+        {
+            var data = new CredentialData(apiKey, apiSecret, sandMode);
+            string json = JsonSerializer.Serialize(data);
+            SaveEncrypted(_filePath, json);
+        }
 
-        public void SaveApiKey(string key) => SaveEncrypted(ApiKeyPath, key);
-        public void SaveApiSecret(string secret) => SaveEncrypted(ApiSecretPath, secret);
-        public string? LoadApiKey() => LoadEncrypted(ApiKeyPath);
-        public string? LoadApiSecret() => LoadEncrypted(ApiSecretPath);
+        public string? LoadApiKey() => Load()?.ApiKey;
+        public string? LoadApiSecret() => Load()?.ApiSecret;
+        public bool LoadSandMode() => Load()?.SandMode ?? false;
+
+        private CredentialData? Load()
+        {
+            string? json = LoadEncrypted(_filePath);
+            if (string.IsNullOrEmpty(json)) return null;
+            try
+            {
+                return JsonSerializer.Deserialize<CredentialData>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         private void SaveEncrypted(string path, string plainText)
         {
-            Directory.CreateDirectory(_appDir);
             byte[] data = Encoding.UTF8.GetBytes(plainText);
             byte[] encrypted = ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
             File.WriteAllBytes(path, encrypted);

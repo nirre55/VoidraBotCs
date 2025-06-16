@@ -40,7 +40,7 @@
             mainTabControl.Controls.Add(tabPageSimulation);
             mainTabControl.Dock = DockStyle.Fill;
             mainTabControl.Location = new Point(0, 0);
-            mainTabControl.Margin = new Padding(4, 4, 4, 4);
+            mainTabControl.Margin = new Padding(4);
             mainTabControl.Name = "mainTabControl";
             mainTabControl.SelectedIndex = 0;
             mainTabControl.Size = new Size(1029, 630);
@@ -49,9 +49,9 @@
             // tabPageConfig
             // 
             tabPageConfig.Location = new Point(4, 30);
-            tabPageConfig.Margin = new Padding(4, 4, 4, 4);
+            tabPageConfig.Margin = new Padding(4);
             tabPageConfig.Name = "tabPageConfig";
-            tabPageConfig.Padding = new Padding(4, 4, 4, 4);
+            tabPageConfig.Padding = new Padding(4);
             tabPageConfig.Size = new Size(1021, 596);
             tabPageConfig.TabIndex = 0;
             tabPageConfig.Text = "Config";
@@ -60,9 +60,9 @@
             // tabPageSimulation
             // 
             tabPageSimulation.Location = new Point(4, 24);
-            tabPageSimulation.Margin = new Padding(4, 4, 4, 4);
+            tabPageSimulation.Margin = new Padding(4);
             tabPageSimulation.Name = "tabPageSimulation";
-            tabPageSimulation.Padding = new Padding(4, 4, 4, 4);
+            tabPageSimulation.Padding = new Padding(4);
             tabPageSimulation.Size = new Size(1021, 602);
             tabPageSimulation.TabIndex = 1;
             tabPageSimulation.Text = "Simulation";
@@ -75,7 +75,7 @@
             ClientSize = new Size(1029, 630);
             Controls.Add(mainTabControl);
             Font = new Font("Segoe UI", 12F);
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;

@@ -61,6 +61,15 @@ namespace WinFormsApp {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Save.
+        /// </summary>
+        internal static string Button_Save {
+            get {
+                return ResourceManager.GetString("Button_Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à Clé API :.
         /// </summary>
         internal static string Label_ApiKey {

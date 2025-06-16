@@ -1,34 +1,60 @@
 ﻿using Implementation.Utils;
 
-
 namespace Implementation.Tests.Utils
 {
-    public class ApiKeyStorageTests
+    public class ApiKeyStorageTests : IDisposable
     {
-        [Fact]
-        public void SaveAndLoadApiKey_ShouldReturnSameValue()
+        private readonly string _testPlatform = "TestPlatform_" + Guid.NewGuid();
+        private readonly ApiKeyStorage _storage;
+        private readonly string _appDir;
+
+        public ApiKeyStorageTests()
         {
-            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var storage = new ApiKeyStorage(tempDir);
-
-            string testKey = "TestAPIKEY123";
-            storage.SaveApiKey(testKey);
-
-            string loadedKey = storage.LoadApiKey();
-            Assert.Equal(testKey, loadedKey);
+            _storage = new ApiKeyStorage(_testPlatform);
+            _appDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "VoidraApp",
+                _testPlatform
+            );
         }
 
         [Fact]
-        public void SaveAndLoadSecretKey_ShouldReturnSameValue()
+        public void SaveAll_And_LoadValues_ShouldReturnCorrectData()
         {
-            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var storage = new ApiKeyStorage(tempDir);
+            // Arrange
+            string expectedKey = "TestApiKey";
+            string expectedSecret = "TestApiSecret";
+            bool expectedSandMode = true;
 
-            string testSecret = "SecretKey456";
-            storage.SaveApiSecret(testSecret);
+            // Act
+            _storage.SaveAll(expectedKey, expectedSecret, expectedSandMode);
 
-            string loadedSecret = storage.LoadApiSecret();
-            Assert.Equal(testSecret, loadedSecret);
+            // Assert
+            Assert.Equal(expectedKey, _storage.LoadApiKey());
+            Assert.Equal(expectedSecret, _storage.LoadApiSecret());
+            Assert.True(_storage.LoadSandMode());
+        }
+
+        [Fact]
+        public void Load_WhenFileMissing_ShouldReturnNullsAndFalse()
+        {
+            // Aucun appel à SaveAll, donc fichier inexistant
+            Assert.Null(_storage.LoadApiKey());
+            Assert.Null(_storage.LoadApiSecret());
+            Assert.False(_storage.LoadSandMode());
+        }
+
+        [Fact]
+        public void SaveAll_WithSandModeFalse_ShouldReturnFalse()
+        {
+            _storage.SaveAll("key", "secret", false);
+            Assert.False(_storage.LoadSandMode());
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(_appDir))
+                Directory.Delete(_appDir, true);
         }
     }
 }

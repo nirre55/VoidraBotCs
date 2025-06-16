@@ -2,9 +2,10 @@
 {
     public interface IApiKeyStorage
     {
-        void SaveApiKey(string key);
-        void SaveApiSecret(string secret);
         string? LoadApiKey();
         string? LoadApiSecret();
+        bool LoadSandMode();
+        void SaveAll(string apiKey, string apiSecret, bool sandMode);
+
     }
 }

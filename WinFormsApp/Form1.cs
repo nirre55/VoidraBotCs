@@ -37,7 +37,6 @@ namespace WinFormsApp
             tab.TabPages["tabPageSimulation"].Controls.Add(simulationCtrl);
 
         }
-
     }
 }
 

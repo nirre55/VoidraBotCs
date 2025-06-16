@@ -34,8 +34,9 @@
             lblApiSecret = new Label();
             textBox2 = new TextBox();
             lblPlatform = new Label();
-            comboBox1 = new ComboBox();
+            cmbPlatform = new ComboBox();
             chkSandbox = new CheckBox();
+            buttonSave = new Button();
             tableLayoutPanelConfig.SuspendLayout();
             SuspendLayout();
             // 
@@ -52,16 +53,18 @@
             tableLayoutPanelConfig.Controls.Add(lblApiSecret, 0, 1);
             tableLayoutPanelConfig.Controls.Add(textBox2, 1, 1);
             tableLayoutPanelConfig.Controls.Add(lblPlatform, 0, 2);
-            tableLayoutPanelConfig.Controls.Add(comboBox1, 1, 2);
-            tableLayoutPanelConfig.Controls.Add(chkSandbox, 1, 3);
+            tableLayoutPanelConfig.Controls.Add(cmbPlatform, 1, 2);
+            tableLayoutPanelConfig.Controls.Add(chkSandbox, 0, 3);
+            tableLayoutPanelConfig.Controls.Add(buttonSave, 0, 4);
             tableLayoutPanelConfig.Dock = DockStyle.Fill;
             tableLayoutPanelConfig.Location = new Point(0, 0);
             tableLayoutPanelConfig.Name = "tableLayoutPanelConfig";
-            tableLayoutPanelConfig.RowCount = 4;
+            tableLayoutPanelConfig.RowCount = 5;
             tableLayoutPanelConfig.RowStyles.Add(new RowStyle());
             tableLayoutPanelConfig.RowStyles.Add(new RowStyle());
             tableLayoutPanelConfig.RowStyles.Add(new RowStyle());
             tableLayoutPanelConfig.RowStyles.Add(new RowStyle());
+            tableLayoutPanelConfig.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanelConfig.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanelConfig.Size = new Size(150, 150);
             tableLayoutPanelConfig.TabIndex = 0;
@@ -115,14 +118,14 @@
             lblPlatform.Text = "label3";
             lblPlatform.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // comboBox1
+            // cmbPlatform
             // 
-            comboBox1.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(47, 61);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(100, 23);
-            comboBox1.TabIndex = 5;
+            cmbPlatform.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            cmbPlatform.FormattingEnabled = true;
+            cmbPlatform.Location = new Point(47, 61);
+            cmbPlatform.Name = "cmbPlatform";
+            cmbPlatform.Size = new Size(100, 23);
+            cmbPlatform.TabIndex = 5;
             // 
             // chkSandbox
             // 
@@ -135,6 +138,19 @@
             chkSandbox.TabIndex = 6;
             chkSandbox.Text = "checkBox1";
             chkSandbox.UseVisualStyleBackColor = true;
+            // 
+            // buttonSave
+            // 
+            buttonSave.AutoSize = true;
+            buttonSave.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tableLayoutPanelConfig.SetColumnSpan(buttonSave, 2);
+            buttonSave.Location = new Point(3, 124);
+            buttonSave.Margin = new Padding(3, 6, 3, 6);
+            buttonSave.Name = "buttonSave";
+            buttonSave.Size = new Size(59, 20);
+            buttonSave.TabIndex = 7;
+            buttonSave.Text = "button1";
+            buttonSave.UseVisualStyleBackColor = true;
             // 
             // ConfigTabControl
             // 
@@ -156,7 +172,8 @@
         private Label lblApiSecret;
         private TextBox textBox2;
         private Label lblPlatform;
-        private ComboBox comboBox1;
+        private ComboBox cmbPlatform;
         private CheckBox chkSandbox;
+        private Button buttonSave;
     }
 }
