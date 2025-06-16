@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
+﻿
 namespace WinFormsApp
 {
     public partial class ConfigTabControl : UserControl
     {
+
         public ConfigTabControl()
         {
             InitializeComponent();
+            LoadLabels();
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void LoadLabels()
         {
-
+            lblApiKey.Text = UiStrings.Label_ApiKey;
+            lblApiSecret.Text = UiStrings.Label_ApiSecret;
+            lblPlatform.Text = UiStrings.Label_Platform;
+            chkSandbox.Text = UiStrings.Label_Sandbox;
         }
     }
 }

@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             tableLayoutPanelConfig = new TableLayoutPanel();
-            label1 = new Label();
+            lblApiKey = new Label();
             textBox1 = new TextBox();
-            label2 = new Label();
+            lblApiSecret = new Label();
             textBox2 = new TextBox();
-            label3 = new Label();
+            lblPlatform = new Label();
             comboBox1 = new ComboBox();
-            checkBox1 = new CheckBox();
+            chkSandbox = new CheckBox();
             tableLayoutPanelConfig.SuspendLayout();
             SuspendLayout();
             // 
@@ -47,13 +47,13 @@
             tableLayoutPanelConfig.ColumnCount = 2;
             tableLayoutPanelConfig.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanelConfig.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanelConfig.Controls.Add(label1, 0, 0);
+            tableLayoutPanelConfig.Controls.Add(lblApiKey, 0, 0);
             tableLayoutPanelConfig.Controls.Add(textBox1, 1, 0);
-            tableLayoutPanelConfig.Controls.Add(label2, 0, 1);
+            tableLayoutPanelConfig.Controls.Add(lblApiSecret, 0, 1);
             tableLayoutPanelConfig.Controls.Add(textBox2, 1, 1);
-            tableLayoutPanelConfig.Controls.Add(label3, 0, 2);
+            tableLayoutPanelConfig.Controls.Add(lblPlatform, 0, 2);
             tableLayoutPanelConfig.Controls.Add(comboBox1, 1, 2);
-            tableLayoutPanelConfig.Controls.Add(checkBox1, 1, 3);
+            tableLayoutPanelConfig.Controls.Add(chkSandbox, 1, 3);
             tableLayoutPanelConfig.Dock = DockStyle.Fill;
             tableLayoutPanelConfig.Location = new Point(0, 0);
             tableLayoutPanelConfig.Name = "tableLayoutPanelConfig";
@@ -66,16 +66,16 @@
             tableLayoutPanelConfig.Size = new Size(150, 150);
             tableLayoutPanelConfig.TabIndex = 0;
             // 
-            // label1
+            // lblApiKey
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(3, 6);
-            label1.Margin = new Padding(3, 6, 3, 6);
-            label1.Name = "label1";
-            label1.Size = new Size(38, 15);
-            label1.TabIndex = 0;
-            label1.Text = "label1";
-            label1.TextAlign = ContentAlignment.MiddleRight;
+            lblApiKey.AutoSize = true;
+            lblApiKey.Location = new Point(3, 6);
+            lblApiKey.Margin = new Padding(3, 6, 3, 6);
+            lblApiKey.Name = "lblApiKey";
+            lblApiKey.Size = new Size(38, 15);
+            lblApiKey.TabIndex = 0;
+            lblApiKey.Text = "label1";
+            lblApiKey.TextAlign = ContentAlignment.MiddleRight;
             // 
             // textBox1
             // 
@@ -85,16 +85,16 @@
             textBox1.Size = new Size(100, 23);
             textBox1.TabIndex = 1;
             // 
-            // label2
+            // lblApiSecret
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(3, 35);
-            label2.Margin = new Padding(3, 6, 3, 6);
-            label2.Name = "label2";
-            label2.Size = new Size(38, 15);
-            label2.TabIndex = 2;
-            label2.Text = "label2";
-            label2.TextAlign = ContentAlignment.MiddleRight;
+            lblApiSecret.AutoSize = true;
+            lblApiSecret.Location = new Point(3, 35);
+            lblApiSecret.Margin = new Padding(3, 6, 3, 6);
+            lblApiSecret.Name = "lblApiSecret";
+            lblApiSecret.Size = new Size(38, 15);
+            lblApiSecret.TabIndex = 2;
+            lblApiSecret.Text = "label2";
+            lblApiSecret.TextAlign = ContentAlignment.MiddleRight;
             // 
             // textBox2
             // 
@@ -104,16 +104,16 @@
             textBox2.Size = new Size(100, 23);
             textBox2.TabIndex = 3;
             // 
-            // label3
+            // lblPlatform
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(3, 64);
-            label3.Margin = new Padding(3, 6, 3, 6);
-            label3.Name = "label3";
-            label3.Size = new Size(38, 15);
-            label3.TabIndex = 4;
-            label3.Text = "label3";
-            label3.TextAlign = ContentAlignment.MiddleRight;
+            lblPlatform.AutoSize = true;
+            lblPlatform.Location = new Point(3, 64);
+            lblPlatform.Margin = new Padding(3, 6, 3, 6);
+            lblPlatform.Name = "lblPlatform";
+            lblPlatform.Size = new Size(38, 15);
+            lblPlatform.TabIndex = 4;
+            lblPlatform.Text = "label3";
+            lblPlatform.TextAlign = ContentAlignment.MiddleRight;
             // 
             // comboBox1
             // 
@@ -124,17 +124,17 @@
             comboBox1.Size = new Size(100, 23);
             comboBox1.TabIndex = 5;
             // 
-            // checkBox1
+            // chkSandbox
             // 
-            checkBox1.AutoSize = true;
-            tableLayoutPanelConfig.SetColumnSpan(checkBox1, 2);
-            checkBox1.Location = new Point(3, 93);
-            checkBox1.Margin = new Padding(3, 6, 3, 6);
-            checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(82, 19);
-            checkBox1.TabIndex = 6;
-            checkBox1.Text = "checkBox1";
-            checkBox1.UseVisualStyleBackColor = true;
+            chkSandbox.AutoSize = true;
+            tableLayoutPanelConfig.SetColumnSpan(chkSandbox, 2);
+            chkSandbox.Location = new Point(3, 93);
+            chkSandbox.Margin = new Padding(3, 6, 3, 6);
+            chkSandbox.Name = "chkSandbox";
+            chkSandbox.Size = new Size(82, 19);
+            chkSandbox.TabIndex = 6;
+            chkSandbox.Text = "checkBox1";
+            chkSandbox.UseVisualStyleBackColor = true;
             // 
             // ConfigTabControl
             // 
@@ -151,12 +151,12 @@
         #endregion
 
         private TableLayoutPanel tableLayoutPanelConfig;
-        private Label label1;
+        private Label lblApiKey;
         private TextBox textBox1;
-        private Label label2;
+        private Label lblApiSecret;
         private TextBox textBox2;
-        private Label label3;
+        private Label lblPlatform;
         private ComboBox comboBox1;
-        private CheckBox checkBox1;
+        private CheckBox chkSandbox;
     }
 }
