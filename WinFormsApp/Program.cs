@@ -2,6 +2,7 @@ using Implementation.Utils.Interfaces;
 using Implementation.Utils;
 using Implementation.Wrappers;
 using Implementation.Wrappers.Interfaces;
+using Implementation.Wrappers.TestableCcxtWrapper;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace WinFormsApp
@@ -39,18 +40,32 @@ namespace WinFormsApp
             // Register factory and wrapper
             services.AddSingleton<IExchangeFactory, ExchangeFactory>();
             services.AddSingleton<IApiKeyStorage, ApiKeyStorage>();
+
+            // Supprimer l'enregistrement de IExchangeOperationsWrapper car il sera créé dynamiquement
+
+            // Modifier l'enregistrement de ICcxtWrapper pour qu'il soit créé à la demande
             services.AddTransient<ICcxtWrapper>(sp =>
             {
                 var factory = sp.GetRequiredService<IExchangeFactory>();
+                var apiKeyStorage = sp.GetRequiredService<IApiKeyStorage>();
 
-                // Configuration parameters (could be loaded from config file)
-                const string exchangeId = "binanceusdm";
-                const string apiKey = "71c0d61b99b727d02a7399fd9d05aefdeafd3f9c984a51fad08314518fe9ad6b";
-                const string secretKey = "06b6bef900e4f9700039716b08d24ba8306d58c0055019856d9336ac8791d0c6";
-                const bool sandbox = true;
+                // Utiliser la plateforme par défaut
+                const string defaultExchangeId = "binanceusdm";
 
-                var exchangeOperations = factory.Create(exchangeId, apiKey, secretKey, sandbox);
-                return new CcxtWrapper(exchangeOperations);
+                // Récupérer les informations depuis le stockage
+                var apiKey = apiKeyStorage.LoadApiKey(defaultExchangeId);
+                var secretKey = apiKeyStorage.LoadApiSecret(defaultExchangeId);
+                var sandbox = apiKeyStorage.LoadSandMode(defaultExchangeId);
+
+                // Vérifier si les clés sont configurées
+                if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(secretKey))
+                {
+                    // Retourner une instance avec des valeurs par défaut ou lancer une exception
+                    throw new InvalidOperationException("Les clés API n'ont pas été configurées. Veuillez les configurer dans l'onglet Configuration.");
+                }
+
+                var exchange = factory.Create(defaultExchangeId, apiKey, secretKey, sandbox);
+                return new CcxtWrapper(exchange);
             });
 
             // Enregistrer le ConfigTabControl

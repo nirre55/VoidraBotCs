@@ -1,16 +1,18 @@
 using Implementation.Wrappers.Interfaces;
 using Implementation.Utils.Interfaces;
+using Implementation.Wrappers;
 
 namespace WinFormsApp
 {
     public partial class Form1 : Form
     {
-        private readonly ICcxtWrapper _ccxt;
+        private readonly IExchangeFactory _exchangeFactory;
         private readonly IApiKeyStorage _apiKeyStorage;
+        private ICcxtWrapper _ccxt;
 
-        public Form1(ICcxtWrapper ccxt, IApiKeyStorage apiKeyStorage)
+        public Form1(IExchangeFactory exchangeFactory, IApiKeyStorage apiKeyStorage)
         {
-            _ccxt = ccxt ?? throw new ArgumentNullException(nameof(ccxt));
+            _exchangeFactory = exchangeFactory ?? throw new ArgumentNullException(nameof(exchangeFactory));
             _apiKeyStorage = apiKeyStorage ?? throw new ArgumentNullException(nameof(apiKeyStorage));
             InitializeComponent();
             InitializeTabs();
@@ -24,34 +26,54 @@ namespace WinFormsApp
         {
             var tab = this.mainTabControl;
             var configCtrl = new ConfigTabControl(_apiKeyStorage) { Dock = DockStyle.Fill };
-            var simulationCtrl = new SimulationTabControl { Dock = DockStyle.Fill };
+            configCtrl.PlatformChanged += OnPlatformChanged;
+
+            // Créer le SimulationTabControl avec l'instance de ICcxtWrapper
+            var simulationCtrl = new SimulationTabControl(_ccxt) { Dock = DockStyle.Fill };
+
             tab.TabPages["tabPageConfig"].Controls.Add(configCtrl);
             tab.TabPages["tabPageSimulation"].Controls.Add(simulationCtrl);
+        }
+
+        private void OnPlatformChanged(object sender, string platform)
+        {
+            try
+            {
+                var apiKey = _apiKeyStorage.LoadApiKey(platform);
+                var secretKey = _apiKeyStorage.LoadApiSecret(platform);
+                var sandbox = _apiKeyStorage.LoadSandMode(platform);
+
+                if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(secretKey))
+                {
+                    MessageBox.Show(
+                        "Veuillez configurer les clés API pour cette plateforme.",
+                        "Configuration requise",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
+                }
+
+                var exchange = _exchangeFactory.Create(platform, apiKey, secretKey, sandbox);
+                _ccxt = new CcxtWrapper(exchange);
+
+                // Mettre à jour le SimulationTabControl avec la nouvelle instance
+                var simulationCtrl = mainTabControl.TabPages["tabPageSimulation"].Controls.OfType<SimulationTabControl>().FirstOrDefault();
+                if (simulationCtrl != null)
+                {
+                    simulationCtrl.UpdateCcxtWrapper(_ccxt);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Erreur lors du changement de plateforme : {ex.Message}",
+                    "Erreur",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
     }
 }
 
-//button1.Enabled = false;
-//label1.Text = "Chargementé";
-
-//try
-//{
-//    double usdt = await _ccxt.GetBalanceAsync("USDT");
-//    label1.Text = $"{usdt:N4} USDT";
-//    _logger.LogInformation("Solde USDT récupéré : {Balance}", usdt);
-//}
-//catch (Exception ex)
-//{
-//    label1.Text = "Erreur";
-//    _logger.LogError(ex, "Erreur lors de la récupération du solde");
-//    MessageBox.Show(
-//        $"Impossible de récupérer le solde :\n{ex.Message}",
-//        "Erreur",
-//        MessageBoxButtons.OK,
-//        MessageBoxIcon.Error
-//    );
-//}
-//finally
-//{
-//    button1.Enabled = true;
-//}

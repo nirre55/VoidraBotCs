@@ -6,6 +6,7 @@ namespace WinFormsApp
     public partial class ConfigTabControl : UserControl
     {
         private readonly IApiKeyStorage _apiKeyStorage;
+        public event EventHandler<string> PlatformChanged;
         public ConfigTabControl(IApiKeyStorage apiKeyStorage)
         {
             _apiKeyStorage = apiKeyStorage;
@@ -24,6 +25,9 @@ namespace WinFormsApp
 
             EnableControls(true);
             LoadSavedSettings();
+
+            // Déclencher l'événement de changement de plateforme
+            PlatformChanged?.Invoke(this, cmbPlatform.SelectedItem.ToString());
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
