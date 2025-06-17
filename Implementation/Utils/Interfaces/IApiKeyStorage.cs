@@ -2,10 +2,11 @@
 {
     public interface IApiKeyStorage
     {
-        string? LoadApiKey();
-        string? LoadApiSecret();
-        bool LoadSandMode();
-        void SaveAll(string apiKey, string apiSecret, bool sandMode);
+        string GetStorageFilePath(string platform);
+        void SaveAll(string apiKey, string apiSecret, bool sandMode, string platform);
+        string? LoadApiKey(string platform);
+        string? LoadApiSecret(string platform);
+        bool LoadSandMode(string platform);
 
     }
 }

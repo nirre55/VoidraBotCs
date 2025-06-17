@@ -7,11 +7,9 @@ namespace Implementation.Utils
 {
     public class ApiKeyStorage : IApiKeyStorage
     {
-        private readonly string _filePath;
-
         private record CredentialData(string ApiKey, string ApiSecret, bool SandMode);
 
-        public ApiKeyStorage(string platform)
+        public string GetStorageFilePath(string platform)
         {
             string appDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -19,23 +17,23 @@ namespace Implementation.Utils
                 platform
             );
             Directory.CreateDirectory(appDir);
-            _filePath = Path.Combine(appDir, "credentials.enc");
+            return Path.Combine(appDir, "credentials.enc");
         }
 
-        public void SaveAll(string apiKey, string apiSecret, bool sandMode)
+        public void SaveAll(string apiKey, string apiSecret, bool sandMode, string platform)
         {
             var data = new CredentialData(apiKey, apiSecret, sandMode);
             string json = JsonSerializer.Serialize(data);
-            SaveEncrypted(_filePath, json);
+            SaveEncrypted(GetStorageFilePath(platform), json);
         }
 
-        public string? LoadApiKey() => Load()?.ApiKey;
-        public string? LoadApiSecret() => Load()?.ApiSecret;
-        public bool LoadSandMode() => Load()?.SandMode ?? false;
+        public string? LoadApiKey(string platform) => Load(platform)?.ApiKey;
+        public string? LoadApiSecret(string platform) => Load(platform)?.ApiSecret;
+        public bool LoadSandMode(string platform) => Load(platform)?.SandMode ?? false;
 
-        private CredentialData? Load()
+        private CredentialData? Load(string platform)
         {
-            string? json = LoadEncrypted(_filePath);
+            string? json = LoadEncrypted(GetStorageFilePath(platform));
             if (string.IsNullOrEmpty(json)) return null;
             try
             {

@@ -1,181 +1,360 @@
-﻿using Moq;
-using AutoFixture;
+﻿
+using Moq;
 using ccxt;
+using Implementation.Wrappers.TestableCcxtWrapper;
 using Implementation.Wrappers;
-using Microsoft.Extensions.Logging;
-using Implementation.Wrappers.Interfaces;
-#nullable enable
+using AutoFixture;
+
 namespace Implementation.Tests.Wrappers
 {
-
     public class CcxtWrapperTests
     {
-        private readonly Fixture _fixture;
-        private readonly Mock<IExchangeWrapper> _exchangeMock;
-        private readonly Mock<ILogger<CcxtWrapper>> _loggerMock;
+        private readonly Mock<IExchangeOperationsWrapper> _mockExchangeOperations;
+        private readonly CcxtWrapper _ccxtWrapper;
+        private readonly Fixture _fixure;
 
         public CcxtWrapperTests()
         {
-            _fixture = new Fixture();
-            _exchangeMock = new Mock<IExchangeWrapper>();
-            _loggerMock = new Mock<ILogger<CcxtWrapper>>();
+            _mockExchangeOperations = new Mock<IExchangeOperationsWrapper>();
+            _ccxtWrapper = new CcxtWrapper(_mockExchangeOperations.Object);
+            _fixure = new Fixture();
         }
 
-        private CcxtWrapper CreateWrapper(bool authenticated = true)
-        {
-            var apiKey = authenticated ? _fixture.Create<string>() : null;
-            var secret = authenticated ? _fixture.Create<string>() : null;
-
-            return new CcxtWrapper(_exchangeMock.Object, _loggerMock.Object, apiKey, secret);
-        }
+        #region Constructor Tests
 
         [Fact]
-        public void Constructor_WithNullLogger_Throws()
+        public void Constructor_WithValidExchangeOperations_ShouldCreateInstance()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-                new CcxtWrapper(_exchangeMock.Object, null, "apiKey", "secret")
-            );
+            // Assert
+            Assert.NotNull(_ccxtWrapper);
         }
 
-        [Fact]
-        public void Constructor_WithNullExchange_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                new CcxtWrapper(null, _loggerMock.Object, "apiKey", "secret")
-            );
-        }
+        #endregion
+
+        #region GetBalanceAsync Tests
 
         [Fact]
-        public async Task GetBalanceAsync_WithoutAuthentication_Throws()
+        public async Task GetBalanceAsync_WithExistingAsset_ShouldReturnBalance()
         {
             // Arrange
-            var wrapper = new CcxtWrapper(_exchangeMock.Object, _loggerMock.Object);
+            const string asset = "BTC";
+            const double expectedBalance = 1.5;
+            var balances = FakeBlanace(asset, expectedBalance);
+
+            _mockExchangeOperations.Setup(ex => ex.FetchBalance()).ReturnsAsync(balances);
+            // Act
+            var result = await _ccxtWrapper.GetBalanceAsync(asset);
+
+            // Assert
+            Assert.Equal(expectedBalance, result);
+            _mockExchangeOperations.Verify(x => x.FetchBalance(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetBalanceAsync_WithNonExistingAsset_ShouldReturnZero()
+        {
+            // Arrange
+            const string asset = "ETH";
+            const double expectedBalance = 1.5;
+            var balances = FakeBlanace(asset, expectedBalance);
+            const string nonExistingAsset = "NonExistingAsset";
+
+
+            _mockExchangeOperations.Setup(ex => ex.FetchBalance()).ReturnsAsync(balances);
+
+            // Act
+            var result = await _ccxtWrapper.GetBalanceAsync(nonExistingAsset);
+
+            // Assert
+            Assert.Equal(0.0, result);
+            _mockExchangeOperations.Verify(x => x.FetchBalance(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetBalanceAsync_WithEmptyBalances_ShouldReturnZero()
+        {
+            // Arrange
+            const string asset = "BTC";
+            var balances = new Balances();
+            balances.total = new Dictionary<string, double>(); // Empty balances
+
+
+            _mockExchangeOperations.Setup(x => x.FetchBalance())
+                                 .ReturnsAsync(balances);
+
+            // Act
+            var result = await _ccxtWrapper.GetBalanceAsync(asset);
+
+            // Assert
+            Assert.Equal(0.0, result);
+            _mockExchangeOperations.Verify(x => x.FetchBalance(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetBalanceAsync_WhenExchangeThrowsException_ShouldRethrowException()
+        {
+            // Arrange
+            const string asset = "BTC";
+            var expectedException = new InvalidOperationException("Exchange error");
+
+            _mockExchangeOperations.Setup(x => x.FetchBalance())
+                                 .ThrowsAsync(expectedException);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => wrapper.GetBalanceAsync("BTC"));
-            Assert.Equal("Clés API requises pour accéder au solde.", ex.Message);
+            var thrownException = await Assert.ThrowsAsync<InvalidOperationException>(() => _ccxtWrapper.GetBalanceAsync(asset));
+            Assert.Equal(expectedException.Message, thrownException.Message);
+            _mockExchangeOperations.Verify(x => x.FetchBalance(), Times.Once);
+        }
 
-            _loggerMock.Verify(l => l.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, _) => v.ToString().Contains("Clés API requises")),
-                null,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()), Times.Once);
+    
+
+        [Fact]
+        public async Task GetBalanceAsync_WithCaseInsensitiveAsset_ShouldReturnZeroIfNotExactMatch()
+        {
+            // Arrange
+            const string asset = "btc"; // lowercase
+            var balances = FakeBlanace("BTC", 1.5);// uppercase
+
+            _mockExchangeOperations.Setup(x => x.FetchBalance())
+                                 .ReturnsAsync(balances);
+
+            // Act
+            var result = await _ccxtWrapper.GetBalanceAsync(asset);
+
+            // Assert
+            Assert.Equal(0.0, result); // Should return 0 because dictionary is case-sensitive
+        }
+
+        #endregion
+
+        #region CreateOrderAsync Tests
+
+        [Fact]
+        public async Task CreateOrderAsync_WithValidParameters_ShouldReturnOrder()
+        {
+            // Arrange
+            const string symbol = "BTC/USDT";
+            const string type = "limit";
+            const string side = "buy";
+            const double amount = 0.01;
+            const double price = 50000.0;
+
+            var ordre = FakeOrder(symbol, type, side, amount, price);
+
+            _mockExchangeOperations.Setup(x => x.CreateOrder(symbol, type, side, amount, price))
+                                 .ReturnsAsync(ordre);
+
+            // Act
+            var result = await _ccxtWrapper.CreateOrderAsync(symbol, type, side, amount, price);
+
+            // Assert
+            Assert.NotNull(result);
+            _mockExchangeOperations.Verify(x => x.CreateOrder(symbol, type, side, amount, price), Times.Once);
+        }
+
+
+        [Fact]
+        public async Task CreateOrderAsync_WhenExchangeThrowsException_ShouldRethrowException()
+        {
+            // Arrange
+            const string symbol = "BTC/USDT";
+            const string type = "limit";
+            const string side = "buy";
+            const double amount = 0.01;
+            const double price = 50000.0;
+
+            var expectedException = new InvalidOperationException("Order creation failed");
+
+            _mockExchangeOperations.Setup(x => x.CreateOrder(symbol, type, side, amount, price))
+                                 .ThrowsAsync(expectedException);
+
+            // Act & Assert
+            var thrownException = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _ccxtWrapper.CreateOrderAsync(symbol, type, side, amount, price));
+
+            Assert.Equal(expectedException.Message, thrownException.Message);
+            _mockExchangeOperations.Verify(x => x.CreateOrder(symbol, type, side, amount, price), Times.Once);
         }
 
         [Fact]
-        public async Task GetBalanceAsync_WithAssetFound_ReturnsBalance()
+        public async Task CreateOrderAsync_WithZeroAmount_ShouldPassToExchange()
         {
-            var asset = "BTC";
-            var expected = 1.2345;
-            var balance = new Balances
-            {
-                total = new Dictionary<string, double> { { asset, expected } }
-            };
+            // Arrange
+            const string symbol = "BTC/USDT";
+            const string type = "limit";
+            const string side = "buy";
+            const double amount = 0.0;
+            const double price = 50000.0;
 
-            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
-            var wrapper = CreateWrapper();
+            var ordre = FakeOrder(symbol, type, side, amount, price);
 
-            var result = await wrapper.GetBalanceAsync(asset);
-            Assert.Equal(expected, result);
-        }
+            _mockExchangeOperations.Setup(x => x.CreateOrder(symbol, type, side, amount, price))
+                                 .ReturnsAsync(ordre);
 
-        [Fact]
-        public async Task GetBalanceAsync_WithAssetNotFound_ReturnsZeroAndLogsWarning()
-        {
-            var balance = new Balances
-            {
-                total = new Dictionary<string, double>
-                {
-                    { "BTC", 1.0 }, { "ADA", 2.0 }
-                }
-            };
+            // Act
+            var result = await _ccxtWrapper.CreateOrderAsync(symbol, type, side, amount, price);
 
-            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
-            var wrapper = CreateWrapper();
-
-            var result = await wrapper.GetBalanceAsync("ETH");
-
-            Assert.Equal(0.0, result);
-
-            _loggerMock.Verify(l => l.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, _) => v.ToString().Contains("Actif 'ETH' non trouvé")),
-                null,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetBalanceAsync_WithEmptyBalances_ReturnsZero()
-        {
-            var balance = new Balances { total = new Dictionary<string, double>() };
-            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
-
-            var wrapper = CreateWrapper();
-            var result = await wrapper.GetBalanceAsync("BTC");
-
-            Assert.Equal(0.0, result);
+            // Assert
+            Assert.NotNull(result);
+            _mockExchangeOperations.Verify(x => x.CreateOrder(symbol, type, side, amount, price), Times.Once);
         }
 
         [Theory]
-        [InlineData("", "valid-secret")]
-        [InlineData(null, "valid-secret")]
-        [InlineData("valid-api-key", "")]
-        [InlineData("valid-api-key", null)]
-        [InlineData("", "")]
-        [InlineData(null, null)]
-        public async Task GetBalanceAsync_WithInvalidCredentials_Throws(string apiKey, string secret)
+        [InlineData("", "limit", "buy", 0.01, 50000.0)]
+        [InlineData("BTC/USDT", "", "buy", 0.01, 50000.0)]
+        [InlineData("BTC/USDT", "limit", "", 0.01, 50000.0)]
+        public async Task CreateOrderAsync_WithEmptyStringParameters_ShouldPassToExchange(
+            string symbol, string type, string side, double amount, double price)
         {
-            var wrapper = new CcxtWrapper(_exchangeMock.Object, _loggerMock.Object, apiKey, secret);
+            // Arrange
+            var ordre = FakeOrder(symbol, type, side, amount, price);
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                wrapper.GetBalanceAsync("BTC"));
+            _mockExchangeOperations.Setup(x => x.CreateOrder(symbol, type, side, amount, price))
+                                 .ReturnsAsync(ordre);
 
-            Assert.Equal("Clés API requises pour accéder au solde.", ex.Message);
+            // Act
+            var result = await _ccxtWrapper.CreateOrderAsync(symbol, type, side, amount, price);
+
+            // Assert
+            Assert.NotNull(result);
+            _mockExchangeOperations.Verify(x => x.CreateOrder(symbol, type, side, amount, price), Times.Once);
         }
 
         [Fact]
-        public async Task GetBalanceAsync_WithZeroBalance_ReturnsZero()
+        public async Task CreateOrderAsync_WithNegativeAmount_ShouldPassToExchange()
         {
-            var asset = "BTC";
-            var balance = new Balances
+            // Arrange
+            const string symbol = "BTC/USDT";
+            const string type = "limit";
+            const string side = "sell";
+            const double amount = -0.01;
+            const double price = 50000.0;
+
+            var ordre = FakeOrder(symbol, type, side, amount, price);
+
+            _mockExchangeOperations.Setup(x => x.CreateOrder(symbol, type, side, amount, price))
+                                 .ReturnsAsync(ordre);
+
+            // Act
+            var result = await _ccxtWrapper.CreateOrderAsync(symbol, type, side, amount, price);
+
+            // Assert
+            Assert.NotNull(result);
+            _mockExchangeOperations.Verify(x => x.CreateOrder(symbol, type, side, amount, price), Times.Once);
+        }
+
+        #endregion
+
+        #region Integration Tests
+
+        [Fact]
+        public async Task CcxtWrapper_SequentialOperations_ShouldWorkCorrectly()
+        {
+            // Arrange
+            const string asset = "BTC";
+            const double balance = 1.0;
+            var balances = new Balances();
+            balances.total = new Dictionary<string, double> { { asset, balance } };
+
+            var rawOrder = new Order()
             {
-                total = new Dictionary<string, double> { { asset, 0.0 } }
+                id = "order123",
+                symbol = "BTC/USDT",
+                type = "market",
+                side = "buy",
+                amount = 0.01,
+                price = 100.0
             };
 
-            _exchangeMock.Setup(x => x.FetchBalanceWrapped()).ReturnsAsync(balance);
-            var wrapper = CreateWrapper();
+            _mockExchangeOperations.Setup(x => x.FetchBalance()).ReturnsAsync(balances);
+            _mockExchangeOperations.Setup(x => x.CreateOrder(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double?>()))
+                .ReturnsAsync(rawOrder);
 
-            var result = await wrapper.GetBalanceAsync(asset);
-            Assert.Equal(0.0, result);
+            // Act
+            var balanceResult = await _ccxtWrapper.GetBalanceAsync(asset);
+            var orderResult = await _ccxtWrapper.CreateOrderAsync("BTC/USDT", "market", "buy", 0.01, 100);
+
+            // Assert
+            Assert.Equal(balance, balanceResult);
+            Assert.NotNull(orderResult);
+            _mockExchangeOperations.Verify(x => x.FetchBalance(), Times.Once);
+            _mockExchangeOperations.Verify(x => x.CreateOrder("BTC/USDT", "market", "buy", 0.01, 100), Times.Once);
         }
 
         [Fact]
-        public async Task CreateOrderAsync_WithValidInput_ReturnsOrder()
+        public async Task CcxtWrapper_ConcurrentOperations_ShouldWorkCorrectly()
         {
-            var order = new Order(new Dictionary<string, object>
+            // Arrange
+            const string asset = "BTC";
+            const double balance = 1.0;
+            var balances = new Balances();
+            balances.total = new Dictionary<string, double> { { asset, balance } };
+
+            var rawOrder = new Order()
             {
-                { "id", "abc123" },
-                { "symbol", "BTC/USDT" },
-                { "amount", 0.5 },
-                { "price", 30000 },
-                { "type", "limit" },
-                { "side", "buy" },
-                { "status", "open" }
-            });
+                id = "order123",
+                symbol = "BTC/USDT",
+                type = "market",
+                side = "buy",
+                amount = 0.01,
+                price = 100.0
+            };
 
-            _exchangeMock.Setup(x => x.CreateOrderWrapped("BTC/USDT", "limit", "buy", 0.5, 30000))
-                         .ReturnsAsync(order);
+            _mockExchangeOperations.Setup(x => x.FetchBalance()).ReturnsAsync(balances);
+            _mockExchangeOperations.Setup(x => x.CreateOrder(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double?>()))
+                .ReturnsAsync(rawOrder);
 
-            var wrapper = CreateWrapper();
+            // Act
+            var balanceTask = _ccxtWrapper.GetBalanceAsync(asset);
+            var orderTask = _ccxtWrapper.CreateOrderAsync("BTC/USDT", "market", "buy", 0.01, 100);
 
-            var result = await wrapper.CreateOrderAsync("BTC/USDT", "limit", "buy", 0.5, 30000);
+            await Task.WhenAll(balanceTask, orderTask);
 
-            Assert.Equal("abc123", result.id);
-            Assert.Equal("BTC/USDT", result.symbol);
-            Assert.Equal(0.5, result.amount);
+            // Assert
+            Assert.Equal(balance, balanceTask.Result);
+            Assert.NotNull(orderTask.Result);
         }
 
+        #endregion
+
+        #region ExchangeOperationsWrapper Tests
+
+        [Fact]
+        public void ExchangeOperationsWrapper_Constructor_WithNullExchange_ShouldThrowArgumentNullException()
+        {
+            // Arrange, Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() => new ExchangeOperationsWrapper(null));
+            Assert.Equal("exchange", exception.ParamName);
+        }
+
+        // Note: Pour tester ExchangeOperationsWrapper avec un vrai Exchange, 
+        // vous auriez besoin d'un exchange réel ou d'une instance de test
+        // Ces tests seraient plutôt des tests d'intégration
+
+        #endregion
+
+        private Balances FakeBlanace(string asset, double expectedBalance) {
+            var balances = new Balances();
+            balances.total = new Dictionary<string, double>
+            {
+                { asset, expectedBalance }
+            };
+            return balances; 
+        }
+
+        private Order FakeOrder(string symbol, string type, string side, double amount, double price)
+        {
+            var order = new Order();
+            order.id = "order123"; // Example order ID
+            order.symbol = symbol;
+            order.type = type;
+            order.side = side;
+            order.amount = amount;
+            order.price = price;
+
+            return order;
+        }
     }
 }

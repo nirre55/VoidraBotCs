@@ -126,6 +126,7 @@
             cmbPlatform.Name = "cmbPlatform";
             cmbPlatform.Size = new Size(100, 23);
             cmbPlatform.TabIndex = 5;
+            cmbPlatform.SelectedIndexChanged += cmbPlatform_SelectedIndexChanged;
             // 
             // chkSandbox
             // 
@@ -151,6 +152,7 @@
             buttonSave.TabIndex = 7;
             buttonSave.Text = "button1";
             buttonSave.UseVisualStyleBackColor = true;
+            buttonSave.Click += buttonSave_Click;
             // 
             // ConfigTabControl
             // 

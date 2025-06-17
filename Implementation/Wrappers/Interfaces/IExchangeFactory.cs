@@ -1,11 +1,10 @@
-﻿using ccxt;
-
+﻿using Implementation.Wrappers.TestableCcxtWrapper;
 
 namespace Implementation.Wrappers.Interfaces
 {
     // Factory interface to create CCXT Exchange instances
     public interface IExchangeFactory
     {
-        IExchangeWrapper Create(string exchangeId, string apiKey, string secret, bool useSandbox = false);
+        IExchangeOperationsWrapper Create(string exchangeId, string apiKey, string secret, bool useSandbox = false);
     }
 }

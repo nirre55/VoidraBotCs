@@ -1,21 +1,19 @@
 ﻿using ccxt;
 using Implementation.Wrappers.Interfaces;
-using Microsoft.Extensions.Logging;
+using Implementation.Wrappers.TestableCcxtWrapper;
 using System.Reflection;
 
 namespace Implementation.Wrappers
 {
     public class ExchangeFactory : IExchangeFactory
     {
-        private readonly ILogger<ExchangeFactory> _logger;
         private static readonly Dictionary<string, Type> _exchangeTypeCache = new();
 
-        public ExchangeFactory(ILogger<ExchangeFactory> logger)
+        public ExchangeFactory()
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public IExchangeWrapper Create(string exchangeId, string apiKey, string secret, bool useSandbox)
+        public IExchangeOperationsWrapper Create(string exchangeId, string apiKey, string secret, bool useSandbox)
         {
             if (string.IsNullOrWhiteSpace(exchangeId))
                 throw new ArgumentException("exchangeId ne peut pas être vide.", nameof(exchangeId));
@@ -29,7 +27,7 @@ namespace Implementation.Wrappers
                 exchangeInstance.setSandboxMode(true);
             }
 
-            return new ExchangeAdapter(exchangeInstance);
+            return new ExchangeOperationsWrapper(exchangeInstance);
         }
 
         private Type ResolveExchangeType(string exchangeId)
@@ -37,7 +35,6 @@ namespace Implementation.Wrappers
             var key = exchangeId.ToLowerInvariant();
             if (_exchangeTypeCache.TryGetValue(key, out var cached))
             {
-                _logger.LogDebug("Type for '{ExchangeId}' retrieved from cache.", exchangeId);
                 return cached;
             }
 
@@ -61,7 +58,6 @@ namespace Implementation.Wrappers
                 if (type != null)
                 {
                     _exchangeTypeCache[key] = type;
-                    _logger.LogInformation("Resolved exchange '{ExchangeId}' to type '{TypeName}'.", exchangeId, type.FullName);
                     return type;
                 }
             }

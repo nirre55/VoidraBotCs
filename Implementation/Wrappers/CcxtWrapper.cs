@@ -1,53 +1,46 @@
 ﻿using ccxt;
 using Implementation.Wrappers.Interfaces;
-using Microsoft.Extensions.Logging;
+using Implementation.Wrappers.TestableCcxtWrapper;
 
 namespace Implementation.Wrappers
 {
     public class CcxtWrapper : ICcxtWrapper
     {
-        private readonly IExchangeWrapper _exchange;
-        private readonly ILogger<CcxtWrapper> _logger;
-        private readonly bool _isAuthenticated;
+        private readonly IExchangeOperationsWrapper _exchange;
 
-        public CcxtWrapper(
-            IExchangeWrapper exchange,
-            ILogger<CcxtWrapper> logger,
-            string apiKey = null,
-            string secret = null
-        )
+        public CcxtWrapper(IExchangeOperationsWrapper exchange)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _exchange = exchange ?? throw new ArgumentNullException(nameof(exchange));
-            _isAuthenticated = !string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(secret);
+            _exchange = exchange;
         }
 
         public async Task<double> GetBalanceAsync(string asset)
         {
-            if (!_isAuthenticated)
+            try
             {
-                _logger.LogError("Clés API requises pour accéder au solde.");
-                throw new InvalidOperationException("Clés API requises pour accéder au solde.");
+                var balances = await _exchange.FetchBalance();
+
+                if (balances.total.TryGetValue(asset, out var total))
+                    return total;
+
+                return 0.0;
             }
-
-            var balances = await _exchange.FetchBalanceWrapped();
-
-            if (balances.total.TryGetValue(asset, out var total))
-                return total;
-
-            _logger.LogWarning("Actif '{Asset}' non trouvé dans les soldes.", asset);
-            return 0.0;
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<Order> CreateOrderAsync(string symbol, string type, string side, double amount, double? price = null)
+        public async Task<Order> CreateOrderAsync(string symbol, string type, string side, double amount, double price)
         {
-            if (!_isAuthenticated)
+            try
             {
-                _logger.LogError("Clés API requises pour créer un ordre.");
-                throw new InvalidOperationException("Clés API requises pour créer un ordre.");
+                var raw = await _exchange.CreateOrder(symbol, type, side, amount, price);
+                return raw;
             }
-
-            return _exchange.CreateOrderWrapped(symbol, type, side, amount, price);
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
