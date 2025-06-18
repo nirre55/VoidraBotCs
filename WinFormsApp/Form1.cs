@@ -8,12 +8,13 @@ namespace WinFormsApp
     {
         private readonly IExchangeFactory _exchangeFactory;
         private readonly IApiKeyStorage _apiKeyStorage;
-        private ICcxtWrapper _ccxt;
+        private ICcxtWrapper? _ccxt;
 
-        public Form1(IExchangeFactory exchangeFactory, IApiKeyStorage apiKeyStorage)
+        public Form1(IExchangeFactory exchangeFactory, IApiKeyStorage apiKeyStorage, ICcxtWrapper? ccxtWrapper)
         {
             _exchangeFactory = exchangeFactory ?? throw new ArgumentNullException(nameof(exchangeFactory));
             _apiKeyStorage = apiKeyStorage ?? throw new ArgumentNullException(nameof(apiKeyStorage));
+            _ccxt = ccxtWrapper; // Assign the ccxtWrapper which might be null
             InitializeComponent();
             InitializeTabs();
         }

@@ -44,7 +44,7 @@ namespace WinFormsApp
             // Supprimer l'enregistrement de IExchangeOperationsWrapper car il sera créé dynamiquement
 
             // Modifier l'enregistrement de ICcxtWrapper pour qu'il soit créé à la demande
-            services.AddTransient<ICcxtWrapper>(sp =>
+            services.AddSingleton<ICcxtWrapper>(sp =>
             {
                 var factory = sp.GetRequiredService<IExchangeFactory>();
                 var apiKeyStorage = sp.GetRequiredService<IApiKeyStorage>();
@@ -61,7 +61,7 @@ namespace WinFormsApp
                 if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(secretKey))
                 {
                     // Retourner une instance avec des valeurs par défaut ou lancer une exception
-                    throw new InvalidOperationException("Les clés API n'ont pas été configurées. Veuillez les configurer dans l'onglet Configuration.");
+                    return null;
                 }
 
                 var exchange = factory.Create(defaultExchangeId, apiKey, secretKey, sandbox);
